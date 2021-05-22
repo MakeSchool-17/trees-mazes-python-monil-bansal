@@ -61,21 +61,14 @@ class Maze:
     def cell_neighbors(self, cell):
         # Logic for getting neighbors based on self.state
         neighbors = []
-        x,y  = x_y(cell)
-        if(self.state == 'create'):
-
-            if cell_in_bounds(x-1,y) and (self.maze_array[cell_index(x-1,y)] & WALL_BITS == 0):
-                neighbors.append(cell_index(x-1,y),0)
-
-            if cell_in_bounds(x+1,y) and (self.maze_array[cell_index(x+1,y)] & WALL_BITS == 0):
-                neighbors.append(cell_index(x+1,y),2)
-
-            if cell_in_bounds(x,y-1) and (self.maze_array[cell_index(x,y-1)] & WALL_BITS == 0):
-                neighbors.append(cell_index(x,y-1),3)
-
-            if cell_in_bounds(x,y+1) and (self.maze_array[cell_index(x,y+1)] & WALL_BITS == 0) :
-                neighbors.append(cell_index(x,y+1),1)
-
+        x, y  = self.x_y(cell)
+        for i in range(4):
+            new_x = x + COMPASS[i][0]
+            new_y = y + COMPASS[i][1]
+            new_cell = self.cell_index(new_x,new_y)
+            if self.cell_in_bounds(new_x,new_y):
+                if self.state == 'create' and (self.maze_array[new_cell] & WALL_BITS == 0):
+                    neighbors.append((new_cell,i))
         return neighbors
 
     # Connect two cells by knocking down the wall between them
