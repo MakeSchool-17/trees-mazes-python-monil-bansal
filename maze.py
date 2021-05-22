@@ -76,6 +76,8 @@ class Maze:
             if cell_in_bounds(x,y+1) and (self.maze_array[cell_index(x,y+1)] & WALL_BITS == 0) :
                 neighbors.append(cell_index(x,y+1),1)
 
+        return neighbors
+
     # Connect two cells by knocking down the wall between them
     # Update wall bits of from_cell and to_cell
     def connect_cells(self, from_cell, to_cell, compass_index):
