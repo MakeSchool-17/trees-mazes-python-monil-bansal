@@ -2,7 +2,8 @@ import pygame
 import sys
 
 # Screen size and cell size used by the maze window
-# Width and height of SCREEN_SIZE should be divisible by CELL_SIZE
+# Width and height of SCREEN_SIZE should be divisible by CELL_SIZE 
+# monil : in this case there will be (20,15) cells in the maze;
 SCREEN_SIZE = (640, 480)
 CELL_SIZE = 32
 
@@ -13,18 +14,19 @@ CELL_SIZE = 32
 # NOTE: Border bits are not currently used
 #                   directions
 #                WSENWSENWSENWSEN
-DEFAULT_CELL = 0b0000000000000000
-#                |bt||s ||b ||w |
-WALL_BITS = 0b0000000000001111
-BACKTRACK_BITS = 0b1111000000000000
-SOLUTION_BITS = 0b0000111100000000
+
+#                    |bt||so||bo||wl|
+DEFAULT_CELL     = 0b0000000000000000
+WALL_BITS        = 0b0000000000001111
+BACKTRACK_BITS   = 0b1111000000000000
+SOLUTION_BITS    = 0b0000111100000000
 
 # Indices match each other
 # WALLS[i] corresponds with COMPASS[i], DIRECTION[i], and OPPOSITE_WALLS[i]
-WALLS = [0b1000, 0b0100, 0b0010, 0b0001]
-OPPOSITE_WALLS = [0b0010, 0b0001, 0b1000, 0b0100]
-COMPASS = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-DIRECTION = ['W', 'S', 'E', 'N']
+WALLS            = [0b1000,  0b0100,  0b0010, 0b0001]
+OPPOSITE_WALLS   = [0b0010,  0b0001,  0b1000, 0b0100]
+COMPASS          = [(-1, 0), (0, 1),  (1, 0), (0, -1)]
+DIRECTION        = ['W',     'S',     'E',    'N']
 
 # Colors
 BLACK = (0, 0, 0, 255)
@@ -50,15 +52,29 @@ class Maze:
         pygame.init()
         self.screen = pygame.display.set_mode(SCREEN_SIZE)
         self.background = pygame.Surface(self.screen.get_size())
-        self.m_layer = pygame.Surface(self.screen.get_size())
-        self.s_layer = pygame.Surface(self.screen.get_size())
+        self.m_layer = pygame.Surface(self.screen.get_size())  # my guess : MAZE LAYER
+        self.s_layer = pygame.Surface(self.screen.get_size())  # my guess : SOLUTION LAYER
         self.setup_maze_window()
 
     # Return cell neighbors within bounds of the maze
     # Use self.state to determine which neighbors should be included
     def cell_neighbors(self, cell):
-        # TODO: Logic for getting neighbors based on self.state
-        pass
+        # Logic for getting neighbors based on self.state
+        neighbors = []
+        x,y  = x_y(cell)
+        if(self.state == 'create'):
+
+            if cell_in_bounds(x-1,y) and (self.maze_array[cell_index(x-1,y)] & WALL_BITS == 0):
+                neighbors.append(cell_index(x-1,y),0)
+
+            if cell_in_bounds(x+1,y) and (self.maze_array[cell_index(x+1,y)] & WALL_BITS == 0):
+                neighbors.append(cell_index(x+1,y),2)
+
+            if cell_in_bounds(x,y-1) and (self.maze_array[cell_index(x,y-1)] & WALL_BITS == 0):
+                neighbors.append(cell_index(x,y-1),3)
+
+            if cell_in_bounds(x,y+1) and (self.maze_array[cell_index(x,y+1)] & WALL_BITS == 0) :
+                neighbors.append(cell_index(x,y+1),1)
 
     # Connect two cells by knocking down the wall between them
     # Update wall bits of from_cell and to_cell
@@ -124,9 +140,9 @@ class Maze:
     def draw_connect_cells(self, from_cell, compass_index):
         x_pos, y_pos = self.x_y_pos(from_cell)
         if compass_index == 0:
-            pygame.draw.line(self.m_layer, NO_COLOR, (x_pos, y_pos + 1),
-                             (x_pos, y_pos + CELL_SIZE - 1))
-        elif compass_index == 1:
+            pygame.draw.line(self.m_layer, NO_COLOR, (x_pos, y_pos + 1),  # y_pos + 1 && CELL_SIZE - 1 for
+                             (x_pos, y_pos + CELL_SIZE - 1))              # leaving out the corners which 
+        elif compass_index == 1:                                          # are shared amongst other borders
             pygame.draw.line(self.m_layer, NO_COLOR, (x_pos + 1,
                              y_pos + CELL_SIZE), (x_pos + CELL_SIZE - 1,
                              y_pos + CELL_SIZE))
