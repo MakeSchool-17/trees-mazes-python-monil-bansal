@@ -4,7 +4,7 @@ import sys
 # Screen size and cell size used by the maze window
 # Width and height of SCREEN_SIZE should be divisible by CELL_SIZE 
 # monil : in this case there will be (20,15) cells in the maze;
-SCREEN_SIZE = (640, 480)
+SCREEN_SIZE = (1280, 960)
 CELL_SIZE = 32
 
 # Some useful numbers needed for the bit manipulation
@@ -69,12 +69,15 @@ class Maze:
             if self.cell_in_bounds(new_x,new_y):
                 if self.state == 'create' and (self.maze_array[new_cell] & WALL_BITS == 0):
                     neighbors.append((new_cell,i))
+                elif self.state == 'solve' and (self.maze_array[cell] & WALLS[i]):
+                    if not self.maze_array[new_cell] & (SOLUTION_BITS | BACKTRACK_BITS):
+                        neighbors.append((new_cell,i))
+
         return neighbors
 
     # Connect two cells by knocking down the wall between them
     # Update wall bits of from_cell and to_cell
     def connect_cells(self, from_cell, to_cell, compass_index):
-        # Logic for updating cell bits
         self.maze_array[from_cell] |= WALLS[compass_index]
         self.maze_array[to_cell] |= OPPOSITE_WALLS[compass_index]
         self.draw_connect_cells(from_cell, compass_index)
@@ -82,13 +85,15 @@ class Maze:
     # Visit a cell along a possible solution path
     # Update solution bits of from_cell and backtrack bits of to_cell
     def visit_cell(self, from_cell, to_cell, compass_index):
-        # TODO: Logic for updating cell bits
+        self.maze_array[from_cell] &= ~SOLUTION_BITS   # WIPE OUT solution bits of FROM CELL
+        self.maze_array[from_cell] |= (WALLS[compass_index] << 8) # UPPDATE solution bits of FROM CELL
+        self.maze_array[to_cell] |= (OPPOSITE_WALLS[compass_index] << 12) # UPDATE backtracking bits of TO CELL
         self.draw_visited_cell(from_cell)
 
     # Backtrack from cell
     # Blank out the solution bits so it is no longer on the solution path
     def backtrack(self, cell):
-        # TODO: Logic for updating cell bits
+        self.maze_array[cell] &= ~SOLUTION_BITS
         self.draw_backtracked_cell(cell)
 
     # Visit cell in BFS search
