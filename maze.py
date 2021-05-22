@@ -74,7 +74,9 @@ class Maze:
     # Connect two cells by knocking down the wall between them
     # Update wall bits of from_cell and to_cell
     def connect_cells(self, from_cell, to_cell, compass_index):
-        # TODO: Logic for updating cell bits
+        # Logic for updating cell bits
+        self.maze_array[from_cell] |= WALLS[compass_index]
+        self.maze_array[to_cell] |= OPPOSITE_WALLS[compass_index]
         self.draw_connect_cells(from_cell, compass_index)
 
     # Visit a cell along a possible solution path
